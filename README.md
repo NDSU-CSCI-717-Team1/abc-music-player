@@ -8,3 +8,6 @@ https://ocw.mit.edu/ans7870/6/6.005/s16/projects/abcplayer/#project_abc_music_pl
 * keinan.balsam@ndsu.edu
 * aravind.elamurugan@ndsu.edu
 * scott.hutchings@ndsu.edu
+
+# Run
+To run a music file 

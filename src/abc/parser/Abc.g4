@@ -27,7 +27,7 @@ meter_fraction        : DIGIT+ '/' DIGIT+;
 meter                 : ('C' | 'C|' | meter_fraction);
 note_length_strict    : DIGIT+ '/' DIGIT+;
 
-field_number          : 'X:' DIGIT end_of_line;
+field_number          : 'X:' WHITESPACE* DIGIT end_of_line;
 field_title           : 'T:' ~NEW_LINE+ end_of_line;
 field_composer        : 'C:' ~NEW_LINE+ end_of_line;
 field_default_length  : 'L:' note_length_strict end_of_line;
@@ -61,7 +61,7 @@ barline               : '|' | '||' | '[|' | '|]' | ':|' | '|:';
 nth_repeat            : '[1' | '[2';
 mid_tune_field        : field_voice;
 
-comment               : '%' ~NEW_LINE+ NEW_LINE;
+comment               : '%' ~NEW_LINE* NEW_LINE;
 end_of_line           : (comment | NEW_LINE);
 basenote              : ('C' | 'D' | 'E' | 'F' | 'G' | 'A' | 'B' | 'c' | 'd' | 'e' | 'f' | 'g' | 'a' | 'b');
 accidental            : ('^' | '^^' | '_' | '__' | '=');

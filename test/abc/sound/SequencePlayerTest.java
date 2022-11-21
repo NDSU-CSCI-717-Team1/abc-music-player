@@ -13,6 +13,7 @@ import org.junit.Test;
 import abc.parser.AbcBaseListener;
 import abc.parser.AbcLexer;
 import abc.parser.AbcParser;
+import abc.parser.NoteListener;
 
 public class SequencePlayerTest {
 
@@ -20,7 +21,7 @@ public class SequencePlayerTest {
 
 	@Test
 	public void test() {
-		String fileName = "sample_abc/piece1.abc";
+		String fileName = "sample_abc/piece2.abc";
 		try {
 			CharStream input = fromFileName(fileName);
 			AbcLexer lexer = new AbcLexer(input);
@@ -30,7 +31,8 @@ public class SequencePlayerTest {
 			// TODO: Implement custom walker, parse tree into POJO, play notes using SquencePlayer
 			ParseTreeWalker walker = new ParseTreeWalker();
 			AbcBaseListener listener = new AbcBaseListener();
-			walker.walk(listener, tree);
+			NoteListener l = new NoteListener();
+			walker.walk(l, tree);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -1,9 +1,14 @@
 package abc.parser;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import abc.model.Music;
 import abc.parser.AbcParser.Abc_headerContext;
 import abc.parser.AbcParser.Abc_lineContext;
 import abc.parser.AbcParser.Abc_musicContext;
@@ -43,8 +48,17 @@ import abc.parser.AbcParser.RestContext;
 import abc.parser.AbcParser.TempoContext;
 import abc.parser.AbcParser.Tuplet_elementContext;
 import abc.parser.AbcParser.Tuplet_specContext;
+import abc.sound.SequencePlayer;
 
 public class NoteListener extends AbcBaseListener {
+
+	private SequencePlayer player;
+	private int tempo;
+	private Music music;
+
+	public Music getMusic() {
+		return music;
+	}
 
 	public NoteListener() {
 		// TODO Auto-generated constructor stub
@@ -112,8 +126,9 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void enterMeter_fraction(Meter_fractionContext ctx) {
-		// TODO Auto-generated method stub
-
+		String meterFraction = ctx.getText();
+		Integer denomintaor = Integer.parseInt(ctx.DIGIT().get(1).getText());
+		this.music = new Music(this.tempo, denomintaor);
 	}
 
 	@Override
@@ -209,7 +224,12 @@ public class NoteListener extends AbcBaseListener {
 	@Override
 	public void enterField_tempo(Field_tempoContext ctx) {
 		// TODO Auto-generated method stub
-
+		String field = ctx.tempo().getText();
+		if (field.contains("=")) {
+			this.tempo = Integer.valueOf(field.substring(field.lastIndexOf("=") + 1));
+		} else {
+			this.tempo = Integer.valueOf(ctx.tempo().getText());
+		}
 	}
 
 	@Override
@@ -301,28 +321,36 @@ public class NoteListener extends AbcBaseListener {
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	@Override
 	public void enterNote_element(Note_elementContext ctx) {
 		// TODO Auto-generated method stub
-		if(ctx.note() != null) {			
-			System.out.println(ctx.note().getText());
-		}
-		else if(ctx.multi_note() != null) {
-			System.out.println(ctx.multi_note().getText());
-		}
 	}
 
 	@Override
 	public void exitNote_element(Note_elementContext ctx) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void enterNote(NoteContext ctx) {
-		// TODO Auto-generated method stub
-
+		if (ctx.parent.parent.getClass().equals(Tuplet_elementContext.class)) {
+			return; // Don't handle notes for tuplets as they will be done separately.
+		}
+		List<String> digits = ctx.note_length().DIGIT().stream().map(it -> it.getText()).collect(Collectors.toList());
+		String numerator = digits.size() > 0 ? digits.get(0) : null;
+		String denominator = digits.size() > 1 ? digits.get(1) : null;
+		if (ctx.note_or_rest().rest() != null) {
+			music.appendRest(numerator, denominator);
+		} else {
+			PitchContext p = ctx.note_or_rest().pitch();
+			Character accidental = Stream.of(p.accidental()).filter(it -> it != null).map(it -> it.getText().charAt(0))
+					.findFirst().orElse(null);
+			char basenote = p.basenote().getText().charAt(0); // Basenote must exist at this point post-rest processing
+			String octave = Stream.of(p.octave()).filter(it -> it != null)
+					.map(it -> new String(it.getText().toCharArray())).findFirst().orElse(null);
+			music.appendNote(accidental, basenote, octave, numerator, denominator);
+		}
 	}
 
 	@Override
@@ -393,8 +421,8 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void enterTuplet_element(Tuplet_elementContext ctx) {
-		// TODO Auto-generated method stub
-
+		List<PitchContext> pitches = ctx.note_element().stream().map(it -> it.note().note_or_rest().pitch()).collect(Collectors.toList());
+		music.appendMultiNoteOrTuplet(pitches);
 	}
 
 	@Override

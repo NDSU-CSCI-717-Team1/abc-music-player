@@ -21,11 +21,9 @@ import abc.parser.NoteListener;
 
 public class SequencePlayerTest {
 
-	// TODO: warmup #2
-
 	@Test
 	public void test() {
-		String fileName = "sample_abc/paddy.abc";
+		String fileName = "sample_abc/prelude.abc";
 		try {
 			CharStream input = fromFileName(fileName);
 			AbcLexer lexer = new AbcLexer(input);

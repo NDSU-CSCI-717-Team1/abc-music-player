@@ -7,6 +7,9 @@ import java.util.stream.Stream;
 import abc.parser.AbcParser.PitchContext;
 import abc.sound.Pitch;
 
+/*
+ * Holds fields parsed from AST for later placement into SequencePlayer.
+ */
 public class Music {
 
 	private final int tempo;
@@ -24,17 +27,17 @@ public class Music {
 		int intDenom = denominator == null ? 1 : Integer.valueOf(denominator);
 		int intNumer = numerator == null ? 1 : Integer.valueOf(numerator);
 		int length = (intNumer * meter) / (intDenom);
-		Pitch p = new Pitch(Character.toUpperCase(basenote));
+		int transpose = getOctave(octave);
 		if (Character.isLowerCase(basenote)) {
-			p = p.transpose(Pitch.OCTAVE);
+			transpose += Pitch.OCTAVE;
 		}
-		handleOctave(p, octave);
 		if (accidental != null && accidental.equals('^')) {
-			p = p.transpose(1);
+			transpose++;
 		} else if (accidental != null && accidental.equals('_')) {
-			p = p.transpose(-1);
+			transpose--;
 		}
-		notes.add(new Note(p.toMidiNote(), currentTick, length));
+		int p = new Pitch(Character.toUpperCase(basenote)).transpose(transpose).toMidiNote();
+		notes.add(new Note(p, currentTick, length));
 		currentTick += length;
 	}
 	
@@ -42,29 +45,25 @@ public class Music {
 	public void appendMultiNoteOrTuplet(List<PitchContext> pitches) {
 		int length = meter;
 		for (PitchContext pitch : pitches) {
-			Pitch p = new Pitch(Character.toUpperCase(pitch.basenote().getText().charAt(0)));
+			int transpose = 0;
 			if (pitch.octave() != null) {
-				handleOctave(p, pitch.octave().getText());
+				transpose += getOctave(pitch.octave().getText());
 			}
 			if (pitch.accidental() != null && pitch.accidental().getText().equals("^")) {
-				p = p.transpose(1);
+				transpose++;
 			} else if (pitch.accidental() != null && pitch.accidental().getText().equals("_")) {
-				p = p.transpose(-1);
+				transpose--;
 			}
-			notes.add(new Note(p.toMidiNote(), currentTick, length));
+			int p = new Pitch(Character.toUpperCase(pitch.basenote().getText().charAt(0))).transpose(transpose).toMidiNote();
+			notes.add(new Note(p, currentTick, length));
 		}
 		currentTick += length;
 	}
 	
-	public void handleOctave(Pitch p, String octave) {
-		long upCount = Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c)).filter(c -> c == '\'').count();
-		for(int i = 0; i < upCount; i++) {
-			p = p.transpose(Pitch.OCTAVE);
-		}
-		long downCount = Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c)).filter(c -> c == ',').count();
-		for(int i = 0; i < downCount; i--) {
-			p = p.transpose(-Pitch.OCTAVE);
-		}
+	public int getOctave(String octave) {
+		int upCount = (int) Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c)).filter(c -> c == '\'').count();
+		int downCount = (int) Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c)).filter(c -> c == ',').count();
+		return (upCount + downCount) * 12;
 	}
 	
 	public void appendRest(String numerator, String denominator) {

@@ -23,7 +23,7 @@ public class SequencePlayerTest {
 
 	@Test
 	public void test() {
-		String fileName = "sample_abc/prelude.abc";
+		String fileName = "sample_abc/sample3.abc";
 		try {
 			CharStream input = fromFileName(fileName);
 			AbcLexer lexer = new AbcLexer(input);

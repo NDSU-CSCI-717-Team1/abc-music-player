@@ -53,7 +53,8 @@ import abc.sound.SequencePlayer;
 public class NoteListener extends AbcBaseListener {
 
 	private SequencePlayer player;
-	private int tempo;
+	private int tempo = 200;
+	private int meter = 4;
 	private Music music;
 
 	public Music getMusic() {
@@ -127,8 +128,8 @@ public class NoteListener extends AbcBaseListener {
 	@Override
 	public void enterMeter_fraction(Meter_fractionContext ctx) {
 		String meterFraction = ctx.getText();
-		Integer denomintaor = Integer.parseInt(ctx.DIGIT().get(1).getText());
-		this.music = new Music(this.tempo, denomintaor);
+		Integer denominator = Integer.parseInt(ctx.DIGIT().get(1).getText());
+		this.meter = denominator;
 	}
 
 	@Override
@@ -282,8 +283,7 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void exitAbc_header(Abc_headerContext ctx) {
-		// TODO Auto-generated method stub
-
+		this.music = new Music(this.tempo, this.meter);
 	}
 
 	@Override

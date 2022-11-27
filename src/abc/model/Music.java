@@ -12,23 +12,27 @@ public class Music {
 	private final int tempo;
 	private final int meter;
 	private final ArrayList<Note> notes = new ArrayList<>();
-	private int currentTick = 0;
+	private int currentTick;
 
 	public Music(int tempo, int meter) {
 		this.tempo = tempo;
 		this.meter = meter;
+		this.currentTick = 0;
 	}
 
 	public void appendNote(Character accidental, char basenote, String octave, String numerator, String denominator) {
 		int intDenom = denominator == null ? 1 : Integer.valueOf(denominator);
 		int intNumer = numerator == null ? 1 : Integer.valueOf(numerator);
-		int length = intNumer * tempo / intDenom;
+		int length = (intNumer * meter) / (intDenom);
 		Pitch p = new Pitch(Character.toUpperCase(basenote));
+		if (Character.isLowerCase(basenote)) {
+			p = p.transpose(Pitch.OCTAVE);
+		}
 		handleOctave(p, octave);
 		if (accidental != null && accidental.equals('^')) {
-			p.transpose(1);
+			p = p.transpose(1);
 		} else if (accidental != null && accidental.equals('_')) {
-			p.transpose(-1);
+			p = p.transpose(-1);
 		}
 		notes.add(new Note(p.toMidiNote(), currentTick, length));
 		currentTick += length;
@@ -36,16 +40,16 @@ public class Music {
 	
 	// Assumes all mutli-notes and tuplets are of length 1 meter
 	public void appendMultiNoteOrTuplet(List<PitchContext> pitches) {
-		int length = tempo;
+		int length = meter;
 		for (PitchContext pitch : pitches) {
 			Pitch p = new Pitch(Character.toUpperCase(pitch.basenote().getText().charAt(0)));
 			if (pitch.octave() != null) {
 				handleOctave(p, pitch.octave().getText());
 			}
-			if (pitch.accidental() != null && pitch.accidental().equals('^')) {
-				p.transpose(1);
-			} else if (pitch.accidental() != null && pitch.accidental().equals('_')) {
-				p.transpose(-1);
+			if (pitch.accidental() != null && pitch.accidental().getText().equals("^")) {
+				p = p.transpose(1);
+			} else if (pitch.accidental() != null && pitch.accidental().getText().equals("_")) {
+				p = p.transpose(-1);
 			}
 			notes.add(new Note(p.toMidiNote(), currentTick, length));
 		}
@@ -53,10 +57,14 @@ public class Music {
 	}
 	
 	public void handleOctave(Pitch p, String octave) {
-		Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c)).filter(c -> c == '\'')
-			.forEach(x -> p.transpose(Pitch.OCTAVE));
-		Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c)).filter(c -> c == ',')
-			.forEach(x -> p.transpose(-Pitch.OCTAVE));
+		long upCount = Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c)).filter(c -> c == '\'').count();
+		for(int i = 0; i < upCount; i++) {
+			p = p.transpose(Pitch.OCTAVE);
+		}
+		long downCount = Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c)).filter(c -> c == ',').count();
+		for(int i = 0; i < downCount; i--) {
+			p = p.transpose(-Pitch.OCTAVE);
+		}
 	}
 	
 	public void appendRest(String numerator, String denominator) {

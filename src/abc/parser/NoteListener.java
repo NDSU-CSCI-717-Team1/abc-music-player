@@ -336,10 +336,20 @@ public class NoteListener extends AbcBaseListener {
 	public void enterNote(NoteContext ctx) {
 		if (ctx.parent.parent.getClass().equals(Tuplet_elementContext.class)) {
 			return; // Don't handle notes for tuplets as they will be done separately.
+		} else if (ctx.parent.parent.getClass().equals(Multi_noteContext.class)) {
+			return; // Don't handle notes for multi_notes as they will be done separately.
 		}
 		List<String> digits = ctx.note_length().DIGIT().stream().map(it -> it.getText()).collect(Collectors.toList());
-		String numerator = digits.size() > 0 ? digits.get(0) : null;
-		String denominator = digits.size() > 1 ? digits.get(1) : null;
+		boolean isFraction = ctx.note_length().getText().contains("/");
+		String numerator = null;
+		String denominator = null;
+		if (isFraction && !digits.isEmpty()) {
+			numerator = digits.size() > 1 ? digits.get(0) : null;
+			System.out.println(ctx.getText() + digits);
+			denominator = digits.size() > 1 ? digits.get(1) : digits.get(0);
+		} else {
+			numerator = digits.size() > 0 ? digits.get(0) : null;
+		}
 		if (ctx.note_or_rest().rest() != null) {
 			music.appendRest(numerator, denominator);
 		} else {
@@ -445,7 +455,8 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void enterMulti_note(Multi_noteContext ctx) {
-		// TODO Auto-generated method stub
+		List<PitchContext> pitches = ctx.note().stream().map(it -> it.note_or_rest().pitch()).collect(Collectors.toList());
+		music.appendMultiNoteOrTuplet(pitches);
 
 	}
 

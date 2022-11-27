@@ -107,8 +107,11 @@ public class SequencePlayerTest {
 			player.addNote(new Pitch('E').transpose(12).toMidiNote(), 246, 12);
 			player.addNote(new Pitch('C').transpose(12).toMidiNote(), 258, 6);
 			player.addNote(new Pitch('D').transpose(12).toMidiNote(), 264, 6);
-			player.addNote(new Pitch('B').toMidiNote(), 270, 9);
+			player.addNote(new Pitch('B').toMidiNote(), 270, 6);
 
+			
+			
+			
 			System.out.println(player);
 
 			player.play();

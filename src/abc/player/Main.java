@@ -1,5 +1,7 @@
 package abc.player;
 
+import abc.sound.Rest;
+
 /**
  * Main entry point of your application.
  */
@@ -20,5 +22,6 @@ public class Main {
 
     public static void main(String[] args) {
         // CALL play() HERE USING ARGS
+    	
     }
 }

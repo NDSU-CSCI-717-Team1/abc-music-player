@@ -1,5 +1,6 @@
 package abc.parser;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,13 +53,13 @@ import abc.sound.SequencePlayer;
 
 public class NoteListener extends AbcBaseListener {
 
-	private SequencePlayer player;
 	private int tempo = 200;
 	private int meter = 4;
-	private Music music;
+	private ArrayList<Music> musicByVoice = new ArrayList<Music>();
+	private int currentVoice = 0;
 
-	public Music getMusic() {
-		return music;
+	public ArrayList<Music> getMusics() {
+		return musicByVoice;
 	}
 
 	public NoteListener() {
@@ -127,7 +128,6 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void enterMeter_fraction(Meter_fractionContext ctx) {
-		String meterFraction = ctx.getText();
 		Integer denominator = Integer.parseInt(ctx.DIGIT().get(1).getText());
 		this.meter = denominator;
 	}
@@ -224,7 +224,6 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void enterField_tempo(Field_tempoContext ctx) {
-		// TODO Auto-generated method stub
 		String field = ctx.tempo().getText();
 		if (field.contains("=")) {
 			this.tempo = Integer.valueOf(field.substring(field.lastIndexOf("=") + 1));
@@ -241,8 +240,14 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void enterField_voice(Field_voiceContext ctx) {
-		// TODO Auto-generated method stub
-
+		if (ctx.parent.getClass().equals(Mid_tune_fieldContext.class)) {
+			int voiceIndex = Integer.parseInt(ctx.DIGIT().stream().map(it -> it.getText()).collect(Collectors.joining()));
+			if (musicByVoice.size() < voiceIndex + 1) {
+				Music firstMusic = musicByVoice.get(0);
+				musicByVoice.add(voiceIndex, new Music(firstMusic.getTempo(), firstMusic.getMeter()));
+			}
+			this.currentVoice = voiceIndex;
+		}
 	}
 
 	@Override
@@ -283,13 +288,12 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void exitAbc_header(Abc_headerContext ctx) {
-		this.music = new Music(this.tempo, this.meter);
+		this.musicByVoice.add(0, new Music(this.tempo, this.meter));
 	}
 
 	@Override
 	public void enterAbc_music(Abc_musicContext ctx) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -339,17 +343,18 @@ public class NoteListener extends AbcBaseListener {
 		} else if (ctx.parent.parent.getClass().equals(Multi_noteContext.class)) {
 			return; // Don't handle notes for multi_notes as they will be done separately.
 		}
+		
 		List<String> digits = ctx.note_length().DIGIT().stream().map(it -> it.getText()).collect(Collectors.toList());
 		boolean isFraction = ctx.note_length().getText().contains("/");
 		String numerator = null;
 		String denominator = null;
 		if (isFraction && !digits.isEmpty()) {
 			numerator = digits.size() > 1 ? digits.get(0) : null;
-			System.out.println(ctx.getText() + digits);
 			denominator = digits.size() > 1 ? digits.get(1) : digits.get(0);
 		} else {
 			numerator = digits.size() > 0 ? digits.get(0) : null;
 		}
+		Music music = musicByVoice.get(currentVoice);
 		if (ctx.note_or_rest().rest() != null) {
 			music.appendRest(numerator, denominator);
 		} else {
@@ -432,7 +437,7 @@ public class NoteListener extends AbcBaseListener {
 	@Override
 	public void enterTuplet_element(Tuplet_elementContext ctx) {
 		List<PitchContext> pitches = ctx.note_element().stream().map(it -> it.note().note_or_rest().pitch()).collect(Collectors.toList());
-		music.appendMultiNoteOrTuplet(pitches);
+		musicByVoice.get(currentVoice).appendMultiNoteOrTuplet(pitches);
 	}
 
 	@Override
@@ -456,8 +461,7 @@ public class NoteListener extends AbcBaseListener {
 	@Override
 	public void enterMulti_note(Multi_noteContext ctx) {
 		List<PitchContext> pitches = ctx.note().stream().map(it -> it.note_or_rest().pitch()).collect(Collectors.toList());
-		music.appendMultiNoteOrTuplet(pitches);
-
+		musicByVoice.get(currentVoice).appendMultiNoteOrTuplet(pitches);
 	}
 
 	@Override

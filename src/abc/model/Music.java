@@ -43,9 +43,12 @@ public class Music {
 	
 	// Assumes all mutli-notes and tuplets are of length 1 meter
 	public void appendMultiNoteOrTuplet(List<PitchContext> pitches) {
-		int length = meter;
+		int length = meter / pitches.size();
 		for (PitchContext pitch : pitches) {
 			int transpose = 0;
+			if (Character.isLowerCase(pitch.basenote().getText().charAt(0))) {
+				transpose += Pitch.OCTAVE;
+			}
 			if (pitch.octave() != null) {
 				transpose += getOctave(pitch.octave().getText());
 			}
@@ -56,8 +59,8 @@ public class Music {
 			}
 			int p = new Pitch(Character.toUpperCase(pitch.basenote().getText().charAt(0))).transpose(transpose).toMidiNote();
 			notes.add(new Note(p, currentTick, length));
+			currentTick += length;
 		}
-		currentTick += length;
 	}
 	
 	public int getOctave(String octave) {
@@ -69,7 +72,7 @@ public class Music {
 	public void appendRest(String numerator, String denominator) {
 		int intDenom = denominator == null ? 1 : Integer.valueOf(denominator);
 		int intNumer = numerator == null ? 1 : Integer.valueOf(numerator);
-		int length = intNumer * tempo / intDenom;
+		int length = (intNumer * meter) / (intDenom);
 		notes.add(new Note(0, currentTick, length));
 	}
 

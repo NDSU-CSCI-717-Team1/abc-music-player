@@ -33,7 +33,7 @@ field_composer        : 'C:' ~NEW_LINE+ end_of_line;
 field_default_length  : 'L:' note_length_strict end_of_line;
 field_meter           : 'M:' meter end_of_line;
 field_tempo           : 'Q:' tempo end_of_line;
-field_voice           : 'V:' ~NEW_LINE+ end_of_line;
+field_voice           : 'V:' WHITESPACE* DIGIT+ end_of_line;
 field_key             : 'K:' key end_of_line;
 other_fields          : (field_composer | field_default_length | field_meter | field_tempo | field_voice | comment);
 
@@ -43,7 +43,7 @@ abc_header            : field_number comment* field_title other_fields* field_ke
  * Parser Rules Music
  */
 
-abc_music             : abc_line+;
+abc_music             : mid_tune_field* abc_line+;
 abc_line              : element* NEW_LINE | mid_tune_field | comment;
 element               : note_element | tuplet_element | barline | nth_repeat | WHITESPACE;
 

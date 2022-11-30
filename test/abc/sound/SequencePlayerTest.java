@@ -23,7 +23,7 @@ public class SequencePlayerTest {
 
 	@Test
 	public void test() {
-		String fileName = "sample_abc/sample3.abc";
+		String fileName = "sample_abc/fur_elise.abc";
 		try {
 			CharStream input = fromFileName(fileName);
 			AbcLexer lexer = new AbcLexer(input);
@@ -34,20 +34,23 @@ public class SequencePlayerTest {
 			ParseTreeWalker walker = new ParseTreeWalker();
 			NoteListener l = new NoteListener();
 			walker.walk(l, tree);
-			
+
 			// Make and play music
-			Music m = l.getMusic();
-			SequencePlayer player = new SequencePlayer(m.getTempo(), m.getMeter());
-			int i = 0;
-			for(Note n: m.getNotes()) {
-				player.addNote(n.getNote(), n.getStartTick(), n.getNumTicks());
+			SequencePlayer player = null;
+			for (Music m : l.getMusics()) {
+				if (player == null) {
+					player = new SequencePlayer(m.getTempo(), m.getMeter());
+				}
+				for (Note n : m.getNotes()) {
+					player.addNote(n.getNote(), n.getStartTick(), n.getNumTicks());
+				}
 			}
-    		System.out.println(player);
-    		player.play();
-    		while (player.isPlaying()) {
-    			Thread.sleep(100);
-    		}
-		} catch (InterruptedException|IOException|MidiUnavailableException|InvalidMidiDataException e) {
+			System.out.println(player);
+			player.play();
+			while (player.isPlaying()) {
+				Thread.sleep(100);
+			}
+		} catch (InterruptedException | IOException | MidiUnavailableException | InvalidMidiDataException e) {
 			e.printStackTrace();
 		}
 	}

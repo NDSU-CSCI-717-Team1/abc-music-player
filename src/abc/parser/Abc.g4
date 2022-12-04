@@ -27,7 +27,7 @@ meter_fraction        : DIGIT+ '/' DIGIT+;
 meter                 : ('C' | 'C|' | meter_fraction);
 note_length_strict    : DIGIT+ '/' DIGIT+;
 
-field_number          : 'X:' WHITESPACE* DIGIT end_of_line;
+field_number          : 'X:' WHITESPACE* DIGIT* end_of_line;
 field_title           : 'T:' ~NEW_LINE+ end_of_line;
 field_composer        : 'C:' ~NEW_LINE+ end_of_line;
 field_default_length  : 'L:' note_length_strict end_of_line;

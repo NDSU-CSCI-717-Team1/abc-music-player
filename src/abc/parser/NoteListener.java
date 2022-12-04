@@ -55,6 +55,7 @@ public class NoteListener extends AbcBaseListener {
 
 	private int tempo = 200;
 	private int meter = 4;
+	private double noteLength = 1;
 	private ArrayList<Music> musicByVoice = new ArrayList<Music>();
 	private int currentVoice = 0;
 
@@ -152,8 +153,10 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void enterNote_length_strict(Note_length_strictContext ctx) {
-		// TODO Auto-generated method stub
-
+		String[] fraction = ctx.getText().split("/");
+		int numerator = Integer.parseInt(fraction[0]);
+		int denominator = Integer.parseInt(fraction[1]);
+		this.noteLength = (double) numerator / denominator;
 	}
 
 	@Override
@@ -288,7 +291,7 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void exitAbc_header(Abc_headerContext ctx) {
-		this.musicByVoice.add(0, new Music(this.tempo, this.meter));
+		this.musicByVoice.add(0, new Music((int) (this.tempo / ((double) this.noteLength * this.meter)), this.meter));
 	}
 
 	@Override
@@ -340,7 +343,7 @@ public class NoteListener extends AbcBaseListener {
 	public void enterNote(NoteContext ctx) {
 		if (ctx.parent.parent.getClass().equals(Tuplet_elementContext.class)) {
 			return; // Don't handle notes for tuplets as they will be done separately.
-		} else if (ctx.parent.parent.getClass().equals(Multi_noteContext.class)) {
+		} else if (ctx.parent.getClass().equals(Multi_noteContext.class)) {
 			return; // Don't handle notes for multi_notes as they will be done separately.
 		}
 		
@@ -437,7 +440,7 @@ public class NoteListener extends AbcBaseListener {
 	@Override
 	public void enterTuplet_element(Tuplet_elementContext ctx) {
 		List<PitchContext> pitches = ctx.note_element().stream().map(it -> it.note().note_or_rest().pitch()).collect(Collectors.toList());
-		musicByVoice.get(currentVoice).appendMultiNoteOrTuplet(pitches);
+		musicByVoice.get(currentVoice).appendMultiNoteOrTuplet(pitches, true);
 	}
 
 	@Override
@@ -461,7 +464,7 @@ public class NoteListener extends AbcBaseListener {
 	@Override
 	public void enterMulti_note(Multi_noteContext ctx) {
 		List<PitchContext> pitches = ctx.note().stream().map(it -> it.note_or_rest().pitch()).collect(Collectors.toList());
-		musicByVoice.get(currentVoice).appendMultiNoteOrTuplet(pitches);
+		musicByVoice.get(currentVoice).appendMultiNoteOrTuplet(pitches, false);
 	}
 
 	@Override

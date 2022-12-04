@@ -23,7 +23,7 @@ public class SequencePlayerTest {
 
 	@Test
 	public void test() {
-		String fileName = "sample_abc/fur_elise.abc";
+		String fileName = "sample_abc/abc_song.abc";
 		try {
 			CharStream input = fromFileName(fileName);
 			AbcLexer lexer = new AbcLexer(input);
@@ -37,7 +37,10 @@ public class SequencePlayerTest {
 
 			// Make and play music
 			SequencePlayer player = null;
+			int i = 0;
 			for (Music m : l.getMusics()) {
+				i++;
+				if (i != 4) ;
 				if (player == null) {
 					player = new SequencePlayer(m.getTempo(), m.getMeter());
 				}

@@ -1,9 +1,9 @@
 package abc.sound;
 
 import java.text.MessageFormat;
+import java.time.Duration;
 
 import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MetaEventListener;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiMessage;
@@ -23,7 +23,7 @@ public class SequencePlayer {
     private static final int DEFAULT_CHANNEL = 0;
     // the volume
     private static final int DEFAULT_VELOCITY = 100;
-
+    
     // the "end_of_track" meta message type
     private static final int META_END_OF_TRACK = 47;
 
@@ -110,20 +110,27 @@ public class SequencePlayer {
         sequencer.open();
         sequencer.setTempoInBPM(this.beatsPerMinute);
 
-        sequencer.addMetaEventListener(new MetaEventListener() {
-            public void meta(MetaMessage meta) {
-                if (meta.getType() == META_END_OF_TRACK) {
+        sequencer.addMetaEventListener(meta -> {
+            try {
+            	if (meta.getType() == META_END_OF_TRACK) {
                     // allow the sequencer to finish
-                    try { Thread.sleep(1000); } catch (InterruptedException ie) { }
+                    try { Thread.sleep(Duration.ofSeconds(1).toMillis()); } catch (InterruptedException ie) { }
                     // stop & close the sequencer
                     sequencer.stop();
                     sequencer.close();
                 }
+            } catch (Throwable t) {
+                t.printStackTrace();
+                throw t;
             }
         });
 
         // start playing!
         sequencer.start();
+    }
+    
+    public boolean isPlaying() {
+    	return sequencer.isOpen();
     }
 
     /**
@@ -219,7 +226,7 @@ public class SequencePlayer {
              * this case, you need to explicitly exit the program with
              * System.exit(0).
              */
-            // System.exit(0);
+             System.exit(0);
 
         } catch (MidiUnavailableException mue) {
             mue.printStackTrace();

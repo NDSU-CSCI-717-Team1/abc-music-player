@@ -2,6 +2,8 @@ package abc.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalInt;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import abc.parser.AbcParser.PitchContext;
@@ -14,6 +16,8 @@ public class Music {
 
 	private final int tempo;
 	private final int meter;
+	private int repeatStartTick = 0;
+
 	private final ArrayList<Note> notes = new ArrayList<>();
 	private int currentTick;
 
@@ -81,6 +85,25 @@ public class Music {
 		notes.add(new Note(0, currentTick, length));
 		currentTick += length;
 	}
+	
+	public void handleRepeat() {
+		int endIndex = notes.size();
+		int startIndex = IntStream.range(0, notes.size())
+			     .filter(i -> this.repeatStartTick == notes.get(i).getStartTick())
+			     .findFirst().orElseThrow(() -> new RuntimeException());
+		int tickStep = 0;
+		for (int i = startIndex; i <= endIndex; i++) {
+			Note repeated = notes.get(i);
+			if (tickStep == 0) {
+				tickStep = repeated.getStartTick();
+				continue;
+			} else if (tickStep != repeated.getStartTick()) {
+				currentTick += repeated.getNumTicks();
+				tickStep += repeated.getNumTicks();
+			}
+			notes.add(new Note(repeated.getPitch(), currentTick, repeated.getNumTicks()));
+		}
+	}
 
 	public void advanceTime(int increment) {
 		currentTick += increment;
@@ -97,4 +120,13 @@ public class Music {
 	public ArrayList<Note> getNotes() {
 		return notes;
 	}
+
+	public int getRepeatStartTick() {
+		return repeatStartTick;
+	}
+
+	public void setRepeatStartTick() {
+		this.repeatStartTick = this.currentTick;
+	}
+
 }

@@ -2,18 +2,18 @@ package abc.model;
 
 public class Note {
 	
-	private final Integer note;
+	private final Integer pitch;
 	private final Integer startTick;
 	private final Integer numTicks;
 
 	public Note(int note, int startTick, int numTicks) {
-		this.note = note;
+		this.pitch = note;
 		this.startTick = startTick;
 		this.numTicks = numTicks;
 	}
 	
-	public Integer getNote() {
-		return note;
+	public Integer getPitch() {
+		return pitch;
 	}
 
 	public Integer getStartTick() {

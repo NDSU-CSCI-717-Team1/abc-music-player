@@ -9,7 +9,6 @@ import java.util.*;
  */
 public class Measure {
 
-	private boolean measureRepeat;
 	private int duration; 
 	private List<MusicElement> musicElements = new ArrayList<MusicElement>();
 	
@@ -20,18 +19,10 @@ public class Measure {
 	 * Constructs an instance of a measure.
 	 */
 	public Measure(boolean measureRepeat, int duration, List<MusicElement> musicElements) {
-		this.measureRepeat = measureRepeat;
 		this.duration = duration;
 		this.musicElements = musicElements;
 	}
 	
-	/**
-	 * 
-	 * @return true if there is a measure repeat
-	 */
-	public boolean isMeasureRepeat() {
-		return measureRepeat;
-	}
 	
 	/**
 	 * Checks that the rep invariant is met
@@ -52,6 +43,10 @@ public class Measure {
 	 * @return a String of the measure that will repeat with a colon and vertical line appended to the end
 	 */
 	public String toString() {
-		return "" + ":|";
+		String addString = "";
+		for (MusicElement elements: this.musicElements) {
+			addString += elements.toString() + "";
+		}
+		return addString;
 	}
 }

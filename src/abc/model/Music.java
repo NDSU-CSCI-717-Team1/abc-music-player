@@ -2,7 +2,6 @@ package abc.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.OptionalInt;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -44,7 +43,7 @@ public class Music {
 		notes.add(new Note(p, currentTick, length));
 		currentTick += length;
 	}
-	
+
 	// Assumes all mutli-notes and tuplets are of length 1 meter
 	public void appendMultiNoteOrTuplet(List<PitchContext> pitches, boolean isTuplet) {
 		int length = meter / pitches.size();
@@ -61,7 +60,8 @@ public class Music {
 			} else if (pitch.accidental() != null && pitch.accidental().getText().equals("_")) {
 				transpose--;
 			}
-			int p = new Pitch(Character.toUpperCase(pitch.basenote().getText().charAt(0))).transpose(transpose).toMidiNote();
+			int p = new Pitch(Character.toUpperCase(pitch.basenote().getText().charAt(0))).transpose(transpose)
+					.toMidiNote();
 			notes.add(new Note(p, currentTick, length));
 			if (isTuplet) {
 				currentTick += length;
@@ -71,13 +71,15 @@ public class Music {
 			currentTick += meter;
 		}
 	}
-	
+
 	public int getOctave(String octave) {
-		int upCount = (int) Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c)).filter(c -> c == '\'').count();
-		int downCount = (int) Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c)).filter(c -> c == ',').count();
+		int upCount = (int) Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c))
+				.filter(c -> c == '\'').count();
+		int downCount = (int) Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c))
+				.filter(c -> c == ',').count();
 		return (upCount - downCount) * 12;
 	}
-	
+
 	public void appendRest(String numerator, String denominator) {
 		int intDenom = denominator == null ? 1 : Integer.valueOf(denominator);
 		int intNumer = numerator == null ? 1 : Integer.valueOf(numerator);
@@ -85,21 +87,18 @@ public class Music {
 		notes.add(new Note(0, currentTick, length));
 		currentTick += length;
 	}
-	
+
 	public void handleRepeat() {
 		int endIndex = notes.size();
 		int startIndex = IntStream.range(0, notes.size())
-			     .filter(i -> this.repeatStartTick == notes.get(i).getStartTick())
-			     .findFirst().orElseThrow(() -> new RuntimeException());
-		int tickStep = 0;
+				.filter(i -> this.repeatStartTick == notes.get(i).getStartTick()).findFirst()
+				.orElseThrow(() -> new RuntimeException());
+		int localNoteStartTick = 0;
 		for (int i = startIndex; i <= endIndex; i++) {
 			Note repeated = notes.get(i);
-			if (tickStep == 0) {
-				tickStep = repeated.getStartTick();
-				continue;
-			} else if (tickStep != repeated.getStartTick()) {
-				currentTick += repeated.getNumTicks();
-				tickStep += repeated.getNumTicks();
+			if (localNoteStartTick != repeated.getStartTick()) {
+				currentTick += (repeated.getStartTick() - localNoteStartTick);
+				localNoteStartTick = repeated.getStartTick();
 			}
 			notes.add(new Note(repeated.getPitch(), currentTick, repeated.getNumTicks()));
 		}

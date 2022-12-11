@@ -16,6 +16,7 @@ public class Music {
 	private final int tempo;
 	private final int meter;
 	private int repeatStartTick = 0;
+	private boolean repeatSkip = false;
 
 	private final ArrayList<Note> notes = new ArrayList<>();
 	private int currentTick;
@@ -40,7 +41,7 @@ public class Music {
 			transpose--;
 		}
 		int p = new Pitch(Character.toUpperCase(basenote)).transpose(transpose).toMidiNote();
-		notes.add(new Note(p, currentTick, length));
+		notes.add(new Note(p, currentTick, length, this.repeatSkip));
 		currentTick += length;
 	}
 
@@ -62,7 +63,7 @@ public class Music {
 			}
 			int p = new Pitch(Character.toUpperCase(pitch.basenote().getText().charAt(0))).transpose(transpose)
 					.toMidiNote();
-			notes.add(new Note(p, currentTick, length));
+			notes.add(new Note(p, currentTick, length, this.repeatSkip));
 			if (isTuplet) {
 				currentTick += length;
 			}
@@ -84,7 +85,7 @@ public class Music {
 		int intDenom = denominator == null ? 1 : Integer.valueOf(denominator);
 		int intNumer = numerator == null ? 1 : Integer.valueOf(numerator);
 		int length = (intNumer * meter) / (intDenom);
-		notes.add(new Note(0, currentTick, length));
+		notes.add(new Note(0, currentTick, length, this.repeatSkip));
 		currentTick += length;
 	}
 
@@ -93,15 +94,19 @@ public class Music {
 		int startIndex = IntStream.range(0, notes.size())
 				.filter(i -> this.repeatStartTick == notes.get(i).getStartTick()).findFirst()
 				.orElseThrow(() -> new RuntimeException());
-		int localNoteStartTick = notes.get(0).getStartTick();
+		int localNoteStartTick = notes.get(startIndex).getStartTick();
 		for (int i = startIndex; i <= endIndex; i++) {
 			Note repeated = notes.get(i);
-			if (localNoteStartTick != repeated.getStartTick()) {
-				currentTick += (repeated.getStartTick() - localNoteStartTick);
-				localNoteStartTick = repeated.getStartTick();
+			if (!notes.get(i).skipOnRepeat()) {
+				if (localNoteStartTick != repeated.getStartTick()) {
+					currentTick += (repeated.getStartTick() - localNoteStartTick);
+					localNoteStartTick = repeated.getStartTick();
+				}
+				notes.add(new Note(repeated.getPitch(), currentTick, repeated.getNumTicks(), this.repeatSkip));
 			}
-			notes.add(new Note(repeated.getPitch(), currentTick, repeated.getNumTicks()));
 		}
+		currentTick += notes.get(notes.size() -1).getNumTicks();
+		setRepeatStartTick(notes.get(endIndex).getStartTick() + notes.get(endIndex).getNumTicks());
 	}
 
 	public void advanceTime(int increment) {
@@ -126,6 +131,18 @@ public class Music {
 
 	public void setRepeatStartTick() {
 		this.repeatStartTick = this.currentTick;
+	}
+
+	public void setRepeatStartTick(Integer i) {
+		this.repeatStartTick = i;
+	}
+
+	public boolean isRepeatSkip() {
+		return repeatSkip;
+	}
+
+	public void setRepeatSkip(boolean repeatSkip) {
+		this.repeatSkip = repeatSkip;
 	}
 
 }

@@ -72,11 +72,6 @@ public class NoteListener extends AbcBaseListener {
 	public void enterBar(BarContext ctx) {
 		Music music = musicByVoice.get(currentVoice);
 		// Handle the opening repeat barline
-		if (ctx.barline().stream().anyMatch(it -> it.getText().equals("|:"))) {
-			music.setRepeatStartTick();
-		} else if (ctx.barline().stream().anyMatch(it -> it.getText().equals(":|"))) {
-			
-		}
 	}
 	
 	@Override
@@ -494,10 +489,14 @@ public class NoteListener extends AbcBaseListener {
 	public void enterBarline(BarlineContext ctx) {
 		Music music = musicByVoice.get(currentVoice);
 		// Handle the opening repeat barline
-		if (ctx.getText().equals("|:")) {
-			music.setRepeatStartTick();
-		} else if (ctx.getText().equals(":|")) {
-			music.handleRepeat();
+		switch(ctx.getText()) {
+			case "|:":
+			case "|]":
+				music.setRepeatStartTick();
+				music.setRepeatSkip(false);
+				break;
+			case ":|":
+				music.handleRepeat();
 		}
 	}
 
@@ -509,8 +508,12 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void enterNth_repeat(Nth_repeatContext ctx) {
-		// TODO Auto-generated method stub
-
+		Music music = musicByVoice.get(currentVoice);
+		// Handle the opening repeat barline
+		switch(ctx.getText()) {
+			case "[1":
+				music.setRepeatSkip(true);
+		}
 	}
 
 	@Override

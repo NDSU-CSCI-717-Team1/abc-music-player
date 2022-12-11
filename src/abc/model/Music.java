@@ -93,7 +93,7 @@ public class Music {
 		int startIndex = IntStream.range(0, notes.size())
 				.filter(i -> this.repeatStartTick == notes.get(i).getStartTick()).findFirst()
 				.orElseThrow(() -> new RuntimeException());
-		int localNoteStartTick = 0;
+		int localNoteStartTick = notes.get(0).getStartTick();
 		for (int i = startIndex; i <= endIndex; i++) {
 			Note repeated = notes.get(i);
 			if (localNoteStartTick != repeated.getStartTick()) {

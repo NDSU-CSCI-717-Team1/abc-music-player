@@ -15,6 +15,7 @@ import abc.parser.AbcParser.Abc_lineContext;
 import abc.parser.AbcParser.Abc_musicContext;
 import abc.parser.AbcParser.Abc_tuneContext;
 import abc.parser.AbcParser.AccidentalContext;
+import abc.parser.AbcParser.BarContext;
 import abc.parser.AbcParser.BarlineContext;
 import abc.parser.AbcParser.BasenoteContext;
 import abc.parser.AbcParser.CommentContext;
@@ -65,6 +66,17 @@ public class NoteListener extends AbcBaseListener {
 
 	public NoteListener() {
 		// TODO Auto-generated constructor stub
+	}
+	
+	@Override
+	public void enterBar(BarContext ctx) {
+		Music music = musicByVoice.get(currentVoice);
+		// Handle the opening repeat barline
+	}
+	
+	@Override
+	public void exitBar(BarContext ctx) {
+		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -475,8 +487,17 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void enterBarline(BarlineContext ctx) {
-		// TODO Auto-generated method stub
-
+		Music music = musicByVoice.get(currentVoice);
+		// Handle the opening repeat barline
+		switch(ctx.getText()) {
+			case "|:":
+			case "|]":
+				music.setRepeatStartTick();
+				music.setRepeatSkip(false);
+				break;
+			case ":|":
+				music.handleRepeat();
+		}
 	}
 
 	@Override
@@ -487,8 +508,12 @@ public class NoteListener extends AbcBaseListener {
 
 	@Override
 	public void enterNth_repeat(Nth_repeatContext ctx) {
-		// TODO Auto-generated method stub
-
+		Music music = musicByVoice.get(currentVoice);
+		// Handle the opening repeat barline
+		switch(ctx.getText()) {
+			case "[1":
+				music.setRepeatSkip(true);
+		}
 	}
 
 	@Override

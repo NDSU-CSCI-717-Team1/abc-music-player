@@ -159,7 +159,7 @@ public class SequencePlayerTest {
 					player = new SequencePlayer(m.getTempo(), m.getMeter());
 				}
 				for (Note n : m.getNotes()) {
-					player.addNote(n.getNote(), n.getStartTick(), n.getNumTicks());
+					player.addNote(n.getPitch(), n.getStartTick(), n.getNumTicks());
 				}
 			}
 			System.out.println(player);

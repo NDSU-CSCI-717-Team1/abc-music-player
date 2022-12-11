@@ -44,8 +44,9 @@ abc_header            : field_number comment* field_title other_fields* field_ke
  */
 
 abc_music             : mid_tune_field* abc_line+;
-abc_line              : element* NEW_LINE | mid_tune_field | comment;
-element               : note_element | tuplet_element | barline | nth_repeat | WHITESPACE;
+abc_line              : bar+ NEW_LINE | mid_tune_field | comment;
+bar					  : barline? (note_element | tuplet_element | WHITESPACE)+ (barline | nth_repeat)+;
+element               : WHITESPACE;
 
 note_element          : note | multi_note;
 note                  : note_or_rest note_length?;

@@ -236,6 +236,18 @@ public class AbcBaseListener implements AbcListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterBar(AbcParser.BarContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBar(AbcParser.BarContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterElement(AbcParser.ElementContext ctx) { }
 	/**
 	 * {@inheritDoc}

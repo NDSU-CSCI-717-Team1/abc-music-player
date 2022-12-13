@@ -33,5 +33,5 @@ Then to run the TestRig tool (grun) against the generated & compiled sources
 * `~/abc-music-player/src # java -cp ".;../lib/*" abc.player.Main ../sample_abc/piece2.abc`
 
 # Eclipse Run Configurations
-![Mac config](./resources/mac_run_configruation.png)
-![Windows config](resources/windows_run_configruation.png)
+![Mac config](resources/mac_run_configuration.png)
+![Windows config](resources/windows_run_configuration.png)

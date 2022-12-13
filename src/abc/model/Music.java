@@ -18,6 +18,17 @@ public class Music {
 	private int repeatStartTick = 0;
 	private boolean repeatSkip = false;
 
+	public static final String DEFAULT_METER = "4/4";
+    
+    public static final String DEFAULT_LENGTH = "1/8";
+    
+    public static final int DEFAULT_TEMPO_BPM = 100;
+    
+    public static final String DEFAULT_COMPOSER = "Unknown";
+    
+    public static final int DEFAULT_DURATION_OF_DEFAULT_NOTE = 192;
+    
+    
 	private final ArrayList<Note> notes = new ArrayList<>();
 	private int currentTick;
 

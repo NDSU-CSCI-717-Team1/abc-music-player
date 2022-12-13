@@ -10,5 +10,6 @@
 	<classpathentry kind="lib" path="lib/antlr.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="lib/hamcrest-all-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/parserlib.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

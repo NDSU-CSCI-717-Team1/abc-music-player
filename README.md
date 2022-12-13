@@ -31,3 +31,7 @@ Then to run the TestRig tool (grun) against the generated & compiled sources
 * `~/abc-music-player/src # javac $sources -cp '../lib/*'`
 1. Run in java with (note the semi colon)
 * `~/abc-music-player/src # java -cp ".;../lib/*" abc.player.Main ../sample_abc/piece2.abc`
+
+# Eclipse Run Configurations
+![Mac config](./resources/mac_run_configruation.png)
+![Windows config](resources/windows_run_configruation.png)

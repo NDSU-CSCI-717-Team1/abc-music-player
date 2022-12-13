@@ -9,7 +9,10 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import abc.model.Accidental;
+import abc.model.Fraction;
 import abc.model.Music;
+import abc.model.Rest;
 import abc.parser.AbcParser.Abc_headerContext;
 import abc.parser.AbcParser.Abc_lineContext;
 import abc.parser.AbcParser.Abc_musicContext;
@@ -361,25 +364,26 @@ public class NoteListener extends AbcBaseListener {
 		
 		List<String> digits = ctx.note_length().DIGIT().stream().map(it -> it.getText()).collect(Collectors.toList());
 		boolean isFraction = ctx.note_length().getText().contains("/");
-		String numerator = null;
-		String denominator = null;
+		Rest rest = new Rest();
+		rest.setDuration(new Fraction(null, null));
 		if (isFraction && !digits.isEmpty()) {
-			numerator = digits.size() > 1 ? digits.get(0) : null;
-			denominator = digits.size() > 1 ? digits.get(1) : digits.get(0);
+			rest.setDuration(new Fraction(digits.size() > 1 ? digits.get(0) : null, digits.size() > 1 ? digits.get(1) : digits.get(0)));
 		} else {
-			numerator = digits.size() > 0 ? digits.get(0) : null;
+			Fraction fraction = new Fraction();
+			fraction.setNumerator(digits.size() > 0 ? digits.get(0) : null);
+			rest.setDuration(fraction);
 		}
 		Music music = musicByVoice.get(currentVoice);
 		if (ctx.note_or_rest().rest() != null) {
-			music.appendRest(numerator, denominator);
+			music.appendRest(rest);
 		} else {
 			PitchContext p = ctx.note_or_rest().pitch();
-			Character accidental = Stream.of(p.accidental()).filter(it -> it != null).map(it -> it.getText().charAt(0))
-					.findFirst().orElse(null);
+			Accidental accidental = new Accidental(p);
+			
 			char basenote = p.basenote().getText().charAt(0); // Basenote must exist at this point post-rest processing
 			String octave = Stream.of(p.octave()).filter(it -> it != null)
 					.map(it -> new String(it.getText().toCharArray())).findFirst().orElse(null);
-			music.appendNote(accidental, basenote, octave, numerator, denominator);
+			music.appendNote(accidental, basenote, octave, rest.getDuration().getNumerator(), rest.getDuration().getDenominator());
 		}
 	}
 

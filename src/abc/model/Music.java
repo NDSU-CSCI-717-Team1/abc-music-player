@@ -27,7 +27,7 @@ public class Music {
 		this.currentTick = 0;
 	}
 
-	public void appendNote(Character accidental, char basenote, String octave, String numerator, String denominator) {
+	public void appendNote(Accidental accidental, char basenote, String octave, String numerator, String denominator) {
 		int intDenom = denominator == null ? 1 : Integer.valueOf(denominator);
 		int intNumer = numerator == null ? 1 : Integer.valueOf(numerator);
 		int length = (intNumer * meter) / (intDenom);
@@ -35,9 +35,9 @@ public class Music {
 		if (Character.isLowerCase(basenote)) {
 			transpose += Pitch.OCTAVE;
 		}
-		if (accidental != null && accidental.equals('^')) {
+		if (accidental.transcribe(accidental.getAccidental()) != null && accidental.transcribe(accidental.getAccidental()).equals('^')) {
 			transpose++;
-		} else if (accidental != null && accidental.equals('_')) {
+		} else if (accidental.transcribe(accidental.getAccidental()) != null && accidental.transcribe(accidental.getAccidental()).equals('_')) {
 			transpose--;
 		}
 		int p = new Pitch(Character.toUpperCase(basenote)).transpose(transpose).toMidiNote();
@@ -78,12 +78,12 @@ public class Music {
 				.filter(c -> c == '\'').count();
 		int downCount = (int) Stream.ofNullable(octave).flatMap(oct -> oct.chars().mapToObj(c -> (char) c))
 				.filter(c -> c == ',').count();
-		return (upCount - downCount) * 12;
+		return (upCount-downCount) * 12;
 	}
 
-	public void appendRest(String numerator, String denominator) {
-		int intDenom = denominator == null ? 1 : Integer.valueOf(denominator);
-		int intNumer = numerator == null ? 1 : Integer.valueOf(numerator);
+	public void appendRest(Rest rest) {
+		int intDenom = rest.getDuration().denominator == null ? 1 : Integer.valueOf(rest.getDuration().denominator);
+		int intNumer = rest.getDuration().numerator == null ? 1 : Integer.valueOf(rest.getDuration().numerator);
 		int length = (intNumer * meter) / (intDenom);
 		notes.add(new Note(0, currentTick, length, this.repeatSkip));
 		currentTick += length;
